@@ -5,11 +5,7 @@ const model = require('./model')
 model.init();
 
 function index(req, res) {
-    model.getAllMessages().then((values) => {
-        console.log(values);
-
-        res.render("index", {values: values});
-    });
+    res.send("Hello, World");
 }
 
 module.exports = {

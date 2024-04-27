@@ -3,34 +3,118 @@
 */
 const { Sequelize, DataTypes } = require('sequelize')
 
-const sequelize = new Sequelize("sqlite:example.db");
+const sequelize = new Sequelize("sqlite:database.db");
 
-const Message = sequelize.define(
-    'Message',
+let dev = true;
+
+// Tasks has a one to one relationship with TaskLevel
+// Task has a one to many relationship with 
+const Task = sequelize.define(
+    'Task',
     {
-        message: {
+        title: {
             type: DataTypes.STRING,
-            allowNull: false,
+        },
+        description: {
+            type: DataTypes.TEXT
+        },
+        level: {
+            type: DataTypes.ENUM('NORMAL', 'PRIORITY', 'IMMEDIATE')
+        },
+        is_finished: {
+            type: DataTypes.BOOLEAN,
+            defaultValue: false
+        }
+    }
+);
+
+const Comment = sequelize.define(
+    'Comment',
+    {
+        name: {
+            type: DataTypes.STRING
+        },
+        message: {
+            type: DataTypes.TEXT
         }
     }
 );
 
 async function init_database() {
-    await Message.drop();
-    await Message.sync();
-    await Message.destroy({truncate: true});
-    let temp = await Message.create({message: "Hello, World 0"})
-    await temp.save();
-    temp = await Message.create({message: "Hello, World 1"});
-    temp.save();
-    temp = await Message.create({message: "Hello, World 2"});
-    temp.save();
-    temp = await Message.create({message: "Hello, World 3"});
-    temp.save();
-    temp = await Message.create({message: "Hello, World 4"});
-    temp.save();
-    temp = await Message.create({message: "Hello, World 5"});
-    temp.save();
+    if(dev) {
+        await Task.drop();
+        await Comment.drop();
+        await Task.hasMany(Comment);
+        await Comment.belongsTo(Task);
+        await Task.sync();
+        await Comment.sync();
+
+        let temp = await Task.create(
+            {
+                title: "SQL Test",
+                description: "This needs to be handled through out the project.",
+                level: Task.getAttributes().level.values[0]
+            }
+        );
+        await temp.save();
+
+        let temp2 = await Comment.create(
+            {
+                name: "Chris",
+                message: "Throught the project???",
+                TaskId: temp.dataValues.id
+            }
+        );
+        temp2.save();
+
+        temp = await Task.create(
+            {
+                title: "Web Test",
+                description: "This needs to be handled by the end of the week.",
+                level: Task.getAttributes().level.values[1],
+                is_finished: true
+            }
+        );
+
+        await temp.save();
+
+        temp2 = await Comment.create(
+            {
+                name: "Chris",
+                message: "Why does does this task need to be handled by the end of the week???",
+                TaskId: temp.dataValues.id
+            }
+        );
+        temp2.save();
+
+        temp2 = await Comment.create(
+            {
+                name: "Dan",
+                message: "Just because. Get it done!!!",
+                TaskId: temp.dataValues.id
+            }
+        );
+        temp2.save();
+
+        temp = await Task.create(
+            {
+                title: "System Down",
+                description: "The system went down. We need this handle asap!",
+                level: Task.getAttributes().level.values[2]
+            }
+        );
+        
+        await temp.save();
+
+        temp2 = await Comment.create(
+            {
+                name: "Chris",
+                message: "What is going one!!!",
+                TaskId: temp.dataValues.id
+            }
+        );
+        temp2.save();
+    }
 }
 
 // This will just contain all of the models.
@@ -38,7 +122,41 @@ module.exports = {
     init: () => {
         init_database();
     },
-    getAllMessages: async () => {
-        return await Message.findAll();
+    TASK: {
+        get_task_enum: () => {
+            return Task.getAttributes().level.values;
+        },
+        get_all_tasks: async () => {
+            return await Task.findAll();
+        },
+        get_all_tasks_via_finished: async (finsied) => {
+            return await Task.findAll({
+                is_finished: finsied
+            });
+        },
+        get_all_normal_tasks: async (finished) => {
+            return await Task.findAll({
+                level: Task.getAttributes().level.values[0],
+                is_finished: finished
+            });
+        },
+        get_all_priority_tasks: async (finished) => {
+            return await Task.findAll({
+                level: Task.getAttributes().level.values[1],
+                is_finished: finished
+            });
+        },
+        get_all_immediate_taks: async (finished) => {
+            return await Task.findAll({
+                level: Task.getAttributes().level.values[2],
+                is_finished: finished
+            });
+        },
+        get_task_from_pk: async (id) => {
+            return await Task.findByPk(id);
+        },
+    },
+    COMMENT: {
+        
     }
 };
