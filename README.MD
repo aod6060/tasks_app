@@ -1,10 +1,10 @@
-# Derf's Simple Node Web Template
+# Tasks App
 
 
-This is a simple template that will help me develop node web applications alot faster. If you want to use it go for it. 
+This is a simple Task application. Basically you can track tasks, comment about it, said finalize. Basically a task tracker. 
 
 
-To initialize this template and grab all of its depends just run.
+To initialize Task App just follow the directions bellow.
 
 Windows:
 
@@ -25,10 +25,9 @@ These script files will automatically install npm dependencies and create the ex
 
 ```
 npm install
-sqlite3 example.db ".save example.db"
 ```
 
-Make sure both npm, sqlite3, and node are installed on your system if you decided to use this template for a web project.
+Make sure both npm, sqlite3, and node are installed on your system if you decided to use Task App.
 
 After all of this initialize just simple run...
 node backend.js
