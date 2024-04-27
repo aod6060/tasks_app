@@ -1,55 +1,87 @@
-<!DOCTYPE html>
-<html data-bs-theme="dark">
-    <head>
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1">    
-        <title>Derf's Simple Node Web Template (DSNWT)</title>
-        <link href="/css/bootstrap.min.css" rel="stylesheet">
-    </head>
-  
-    </head>
-    <body>
-        <div class="container">
-            <h1>Derf's Simple Node Web Template (DSNWT)</h1>
-
-            <p>
-                If your seeing this then you've successfully installed DSNWT. Look
-                at model.js, config.js, and controller.js in the app folder to start working on
-                your web app. All views are located in the 'views' folder and if
-                you need static content such is client side *.js file, *.css files
-                images like *.png and *.jpg place them in the public folder.
-            </p>
-
-            <p>
-                I've also included <a href="https://getbootstrap.com/">bootstrap</a> part of this 
-                to speed up development time. If you don't want to use it just remove it from public
-                ./public/css and ./public/js folders.
-            </p>
+<%- include("includes/header.ejs") %>
 
 
-            <p>
-                Database test to see if it works.
-
-            <%
-            
-            for(i = 0; i < values.length; i++) {
-
-                let v = values[i];
-
-                %>
-<p>
-    <%= v.dataValues.id %>: <%= v.dataValues.message %>
-</p>
-                <%
+<div class="mb-3">
+    <!-- I'll add stuff later-->
+    <form action="/index/filtered" method="post">
+        <label>
+            Level
+        </label>
+        <select name="level">
+            <option value="ALL" selected>ALL</option>
+<%
+            for(i = 0; i < levels.length; i++) {
+                l = levels[i];
+%>
+            <option value="<%= l %>"><%= l %></option>
+<%
             }
+%>
+        </select>
+        <label>
+            Finished
+        </label>
+        <select name="finished">
+            <option value="ALL" selected>ALL</option>
+            <option value="WORKING">WORKING</option>
+            <option value="DONE">DONE</option>
+        </select>
+        <input type="submit" value="Apply" class="btn btn-primary" />
+    </form>
+</div>
 
-            %>
+<div class="mb-3">
+    <a href="#" class="btn btn-primary">New</a>
+</div>
 
+<div class="mb-3">
+
+<%
+    for(i = 0; i < values.length; i++) {
+        let v = values[i]
+
+        let level = v.dataValues.level;
+
+        let style = "";
+
+        if(level == "NORMAL") {
+            style = "border-success text-white";
+        } else if(level == "PRIORITY") {
+            style = "border-warning text-white";
+        } else if(level == "IMMEDIATE") {
+            style = "border-danger text-white";
+        }
+%>
+
+    <div class="card mb-3 <%= style %>">
+        <div class="card-header">
+            <h2 class="card-title"><%= v.dataValues.title %></h2>
+        </div>
+        <div class="card-body">
+            <p class="card-text">
+                <%= v.dataValues.description %>
+            </p>
+            <p>
+                STATUS: 
+                <%
+                    if(v.dataValues.is_finished) {
+                %>
+                        Finished
+                <%
+                    } else {
+                %>
+                        Not Finished
+                <%
+                    }
+                %>
             </p>
         </div>
+    </div>
 
+<%
+    }
+%>
 
-        <script src="/js/bootstrap.bundle.min.js"></script>
-        
-    </body>
-</html>
+</div>
+
+<%- include("includes/footer.ejs") %>

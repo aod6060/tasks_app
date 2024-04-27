@@ -129,32 +129,58 @@ module.exports = {
         get_all_tasks: async () => {
             return await Task.findAll();
         },
-        get_all_tasks_via_finished: async (finsied) => {
-            return await Task.findAll({
-                is_finished: finsied
-            });
-        },
-        get_all_normal_tasks: async (finished) => {
-            return await Task.findAll({
-                level: Task.getAttributes().level.values[0],
-                is_finished: finished
-            });
-        },
-        get_all_priority_tasks: async (finished) => {
-            return await Task.findAll({
-                level: Task.getAttributes().level.values[1],
-                is_finished: finished
-            });
-        },
-        get_all_immediate_taks: async (finished) => {
-            return await Task.findAll({
-                level: Task.getAttributes().level.values[2],
-                is_finished: finished
-            });
+        get_all_filtered_tasks: async (level, finished) => {
+            filter = {};
+
+            if(level != "ALL") {
+                filter["level"] = level;
+            }
+
+            if(finished != "ALL") {
+                if(finished == "WORKING") {
+                    filter["is_finished"] = false;
+                } else if(finished == "DONE") {
+                    filter["is_finished"] = true;
+                }
+            }
+
+            console.log(filter);
+
+
+            if(typeof filter["level"] != "undefined" && typeof filter["is_finished"] != "undefined") {
+                return await Task.findAll({
+                    where: {
+                        level: filter["level"],
+                        is_finished: filter["is_finished"],
+                    }
+                });
+            } else if(typeof filter["level"] != "undefined" && typeof filter["is_finished"] == "undefined") {
+                return await Task.findAll({
+                    where: {
+                        level: filter["level"],
+                    }
+                });
+            } else if(typeof filter["level"] == "undefined" && typeof filter["is_finished"] != "undefined") {
+                return await Task.findAll({
+                    where: {
+                        is_finished: filter["is_finished"],
+                    }
+                });
+            } else {
+                return await Task.findAll();
+            }
         },
         get_task_from_pk: async (id) => {
             return await Task.findByPk(id);
         },
+        create_task: async (title, description, level) => {
+            let temp = await Task.create({
+                title: title,
+                description: description,
+                level: level
+            });
+            return await temp.save();
+        }
     },
     COMMENT: {
         
