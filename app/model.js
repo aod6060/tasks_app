@@ -15,6 +15,9 @@ const Task = sequelize.define(
         title: {
             type: DataTypes.STRING,
         },
+        name: {
+            type: DataTypes.STRING
+        },
         description: {
             type: DataTypes.TEXT
         },
@@ -52,6 +55,7 @@ async function init_database() {
         let temp = await Task.create(
             {
                 title: "SQL Test",
+                name: "Dan",
                 description: "This needs to be handled through out the project.",
                 level: Task.getAttributes().level.values[0]
             }
@@ -70,6 +74,7 @@ async function init_database() {
         temp = await Task.create(
             {
                 title: "Web Test",
+                name: "Fred",
                 description: "This needs to be handled by the end of the week.",
                 level: Task.getAttributes().level.values[1],
                 is_finished: true
@@ -99,6 +104,7 @@ async function init_database() {
         temp = await Task.create(
             {
                 title: "System Down",
+                name: "Chris",
                 description: "The system went down. We need this handle asap!",
                 level: Task.getAttributes().level.values[2]
             }
@@ -173,8 +179,9 @@ module.exports = {
         get_task_from_pk: async (id) => {
             return await Task.findByPk(id);
         },
-        create_task: async (title, description, level) => {
+        create_task: async (name, title, description, level) => {
             let temp = await Task.create({
+                name: name,
                 title: title,
                 description: description,
                 level: level

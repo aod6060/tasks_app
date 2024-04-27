@@ -1,0 +1,59 @@
+<%- include("includes/header.ejs") %>
+
+<%
+    if(typeof error != "undefined") {
+%>
+        <div class="card border-danger text-white mb-3">
+            <div class="card-header">
+                <h2 class="card-title">
+                    Error
+                </h2>
+            </div>
+            <div class="card-body">
+                <p class="card-text">
+                    <%= error %>
+                </p>
+            </div>
+        </div>
+<%
+    }
+%>
+
+<div class="mb-3">
+    <form action="/create" method="post">
+        <div class="mb-3">
+            <label class="form-label">Name</label>
+            <input type="text" name="name" class="form-control" />
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Title</label>
+            <input type="text" name="title" class="form-control" />
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Description</label>
+            <textarea name="description" class="form-control"></textarea>
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Level</label>
+            <select name="level">
+<%
+                for(let i = 0; i < levels.length; i++) {
+                    let l = levels[i];
+%>
+                
+                    <option value="<%= l %>" <% if(i == 0) { %> selected<% } %>><%= l %></option>
+<%
+                }
+%>
+            </select>
+        </div>
+        <div class="mb-3">
+            <input type="submit" value="New Task" class="btn btn-primary"/>
+        </div>
+    </form>
+</div>
+
+<div class="mb-3">
+    <a href="/">Back to Index</a>
+</div>
+<%- include("includes/footer.ejs") %>

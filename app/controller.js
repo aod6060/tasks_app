@@ -37,22 +37,49 @@ function index_apply_filter(req, res) {
     Creating task
 */
 function create_task(req, res) {
-
+    res.render('create_task', {levels: model.TASK.get_task_enum()});
 }
 
 function create_task_error(req, res) {
-
+    res.render('create_task', {levels: model.TASK.get_task_enum(), error: req.params.message});
 }
 
-function create_task_pos(req, res) {
-
+function create_task_post(req, res) {
+    if(req.body.name == "") {
+        let message = "Name can't not be empty!";
+        res.redirect(`/create/error/${message}`);
+    }
+    else if(req.body.title == "") {
+        let message = "Title can't not be empty!";
+        res.redirect(`/create/error/${message}`);
+    } else if(req.body.description == "") {
+        let message = "Description can't not be empty!";
+        res.redirect(`/create/error/${message}`);
+    } else {
+        model.TASK.create_task(
+            req.body.name,
+            req.body.title,
+            req.body.description,
+            req.body.level
+        )
+        .then((value)=> {
+            res.redirect('/');
+        });
+        //res.redirect('/');
+    }
+    //res.redirect('/');
 }
 
 module.exports = {
     init: (app) => {
         // Handle roughts
+        // Index Page
         app.get('/', index);
         app.post('/index/filtered', index_filter);
         app.get('/index/filter/:level/:finished', index_apply_filter);
+        // Create Page
+        app.get('/create', create_task);
+        app.get('/create/error/:message', create_task_error);
+        app.post('/create', create_task_post);
     }
 };

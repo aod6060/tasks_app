@@ -31,7 +31,7 @@
 </div>
 
 <div class="mb-3">
-    <a href="#" class="btn btn-primary">New</a>
+    <a href="/create" class="btn btn-primary">New</a>
 </div>
 
 <div class="mb-3">
@@ -58,6 +58,9 @@
             <h2 class="card-title"><%= v.dataValues.title %></h2>
         </div>
         <div class="card-body">
+            <p class="card-title">
+                Create By: <%= v.dataValues.name %>
+            </p>
             <p class="card-text">
                 <%= v.dataValues.description %>
             </p>
