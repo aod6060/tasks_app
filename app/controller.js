@@ -70,16 +70,34 @@ function create_task_post(req, res) {
     //res.redirect('/');
 }
 
+/*
+    View Task
+*/
+function view_task(req, res) {
+    if(typeof req.params.id == 'undefined') {
+        res.redirect('/');
+    } else {
+        model.TASK.get_task_from_pk(req.params.id)
+        .then((task) => {
+            model.COMMENT.get_all_comments_from_TaskId(task.id)
+            .then((comments) => {
+                res.render('view_task', {task: task, comments: comments});
+            });
+        });
+    }
+}
 module.exports = {
     init: (app) => {
         // Handle roughts
-        // Index Page
+        // Task List
         app.get('/', index);
         app.post('/index/filtered', index_filter);
         app.get('/index/filter/:level/:finished', index_apply_filter);
-        // Create Page
+        // Create Task
         app.get('/create', create_task);
         app.get('/create/error/:message', create_task_error);
         app.post('/create', create_task_post);
+        // View Task
+        app.get('/view/:id', view_task);
     }
 };

@@ -190,6 +190,12 @@ module.exports = {
         }
     },
     COMMENT: {
-        
+        get_all_comments_from_TaskId: async (id) => {
+            return await Comment.findAll({
+                where: {
+                    TaskId: id
+                }
+            });
+        }
     }
 };
