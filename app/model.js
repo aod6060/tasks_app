@@ -5,7 +5,7 @@ const { Sequelize, DataTypes } = require('sequelize')
 
 const sequelize = new Sequelize("sqlite:database.db");
 
-let dev = true;
+let dev = false;
 
 // Tasks has a one to one relationship with TaskLevel
 // Task has a one to many relationship with 
@@ -187,6 +187,13 @@ module.exports = {
                 level: level
             });
             return await temp.save();
+        },
+        update_task_finish: async (id, is_finished) => {
+            let temp = await Task.findByPk(id)
+            await temp.update({
+                is_finished: is_finished
+            });
+            return await temp.save();
         }
     },
     COMMENT: {
@@ -196,6 +203,14 @@ module.exports = {
                     TaskId: id
                 }
             });
+        },
+        create_comment: async (name, message, TaskId) => {
+            let temp = await Comment.create({
+                name: name,
+                message: message,
+                TaskId: TaskId
+            });
+            return await temp.save();
         }
     }
 };

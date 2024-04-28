@@ -5,13 +5,93 @@
     <a href="#" class="btn btn-primary">Edit</a> | <a href="#" class="btn btn-danger">Delete</a>
 </div>
 <!-- This section will view the -->
-
+<div class="mb-3">
+    <h2>
+        <%= task.dataValues.title %>
+    </h2>
+    <p>
+        Create By: <%= task.dataValues.name %>
+    </p>
+    <p>
+        <%= task.dataValues.description %>
+    </p>
+</div>
 <!-- This little form will be used to finalize task or reinable it. -->
-
+<div>
+<% 
+    if(task.dataValues.is_finished) {
+%>
+        <form action="/view/<%= task.dataValues.id %>/open" method="post">
+            <div class="mb-3">
+                <input type="submit" value="open" class="btn btn-primary">
+            </div>
+        </form>
+<%
+    } else {
+%>
+        <form action="/view/<%= task.dataValues.id %>/close" method="post">
+            <div class="mb-3">
+                <input type="submit" value="close" class="btn btn-primary">
+            </div>
+        </form>
+<%
+    }
+%>
+</div>
 <!-- This form will allow for the users to post -->
 
-<!-- This will display all the comments on the given task. -->
+<%
+    if(!task.dataValues.is_finished) {
+        // This makes since because your closing the 
+        // Task so why comment on it.
+%>
+<div class="mb-3">
+    <form action="/view/<%= task.dataValues.id %>/comment" method="post">
+        <div class="mb-3">
+            <lable class="form-label">
+                Name
+            </lable>
+            <input type="text" name="name" class="form-control" />
+        </div>
+        <div class="mb-3">
+            <label class="form-label">
+                Message
+            </label>
+            <textarea name="message" class="form-control"></textarea>
+        </div>
+        <div class="mb-3">
+            <input type="submit" value="Add Comment" class="btn btn-primary" />
+        </div>
+    </form>
+</div>
 
+<%
+    }
+%>
+<!-- This will display all the comments on the given task. -->
+<div class="mb-3">
+    Comments
+</div>
+<% 
+    for(let i = 0; i < comments.length; i++) {
+        let temp = comments[i];
+
+%>
+        <div class="card mb-3">
+            <div class="card-header">
+                <h3 class="card-title">
+                    Create By: <%= temp.dataValues.name %>
+                </h3>
+            </div>
+            <div class="card-body">
+                <p class="card-text">
+                    <%= temp.dataValues.message %>
+                </p>
+            </div>
+        </div>
+<%
+    }
+%>
 <div class="mb-3">
     <a href="/">Back to Index</a>
 </div>

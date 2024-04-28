@@ -79,13 +79,36 @@ function view_task(req, res) {
     } else {
         model.TASK.get_task_from_pk(req.params.id)
         .then((task) => {
-            model.COMMENT.get_all_comments_from_TaskId(task.id)
+            model.COMMENT.get_all_comments_from_TaskId(task.dataValues.id)
             .then((comments) => {
                 res.render('view_task', {task: task, comments: comments});
             });
         });
     }
 }
+
+function view_task_close(req, res) {
+    model.TASK.update_task_finish(req.params.id, true)
+    .then((value) => {
+        res.redirect(`/view/${req.params.id}`);
+    });
+}
+
+function view_task_open(req, res) {
+    model.TASK.update_task_finish(req.params.id, false)
+    .then((value) => {
+        res.redirect(`/view/${req.params.id}`);
+    })
+}
+
+function view_task_post_comment(req, res) {
+    //res.redirect(`/view/${req.params.id}`);
+    model.COMMENT.create_comment(req.body.name, req.body.message, req.params.id)
+    .then((value) => {
+        res.redirect(`/view/${req.params.id}`);
+    });
+}
+
 module.exports = {
     init: (app) => {
         // Handle roughts
@@ -99,5 +122,8 @@ module.exports = {
         app.post('/create', create_task_post);
         // View Task
         app.get('/view/:id', view_task);
+        app.post('/view/:id/close', view_task_close);
+        app.post('/view/:id/open', view_task_open);
+        app.post('/view/:id/comment', view_task_post_comment);
     }
 };
