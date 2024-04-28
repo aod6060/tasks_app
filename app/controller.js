@@ -109,6 +109,24 @@ function view_task_post_comment(req, res) {
     });
 }
 
+
+/*
+    Edit Task
+*/
+function edit_task(req, res) {
+    model.TASK.get_task_from_pk(req.params.id)
+    .then((task) => {
+        res.render('edit_task', {task: task, levels: model.TASK.get_task_enum()})
+    });
+}
+
+function edit_task_post(req, res) {
+    model.TASK.update_task(req.params.id, req.body.name, req.body.title, req.body.description, req.body.level)
+    .then((value) => {
+        res.redirect(`/view/${req.params.id}`)
+    });
+}
+
 module.exports = {
     init: (app) => {
         // Handle roughts
@@ -125,5 +143,8 @@ module.exports = {
         app.post('/view/:id/close', view_task_close);
         app.post('/view/:id/open', view_task_open);
         app.post('/view/:id/comment', view_task_post_comment);
+        // Edit Task
+        app.get('/edit/:id', edit_task);
+        app.post('/edit/:id', edit_task_post);
     }
 };

@@ -1,0 +1,61 @@
+<%- include("includes/header.ejs") %>
+<div class="mb-3">
+    <div class="mb-3">
+        <a href="/view/<%= task.dataValues.id %>" class="btn btn-primary">View</a> | <a href="#" class="btn btn-danger">Delete</a>
+    </div>
+</div>
+
+<%
+    if(typeof error != "undefined") {
+%>
+        <div class="card border-danger text-white mb-3">
+            <div class="card-header">
+                <h2 class="card-title">
+                    Error
+                </h2>
+            </div>
+            <div class="card-body">
+                <p class="card-text">
+                    <%= error %>
+                </p>
+            </div>
+        </div>
+<%
+    }
+%>
+
+<div class="mb-3">
+    <form action="/edit/<%= task.dataValues.id %>" method="post">
+        <div class="mb-3">
+            <label class="form-label">Name</label>
+            <input type="text" name="name" class="form-control" value="<%= task.dataValues.name %>"/>
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Title</label>
+            <input type="text" name="title" class="form-control" value="<%= task.dataValues.title %>"/>
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Description</label>
+            <textarea name="description" class="form-control"><%= task.dataValues.description %></textarea>
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Level</label>
+            <select name="level">
+<%
+                for(let i = 0; i < levels.length; i++) {
+                    let l = levels[i];
+%>
+                
+                    <option value="<%= l %>" <% if(l == task.dataValues.level) { %> selected<% } %>><%= l %></option>
+<%
+                }
+%>
+            </select>
+        </div>
+        <div class="mb-3">
+            <input type="submit" value="Edit Task" class="btn btn-primary"/>
+        </div>
+    </form>
+</div>
+
+<%- include("includes/footer.ejs") %>

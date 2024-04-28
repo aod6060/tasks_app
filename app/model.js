@@ -194,6 +194,16 @@ module.exports = {
                 is_finished: is_finished
             });
             return await temp.save();
+        },
+        update_task: async (id, name, title, description, level) => {
+            let temp = await Task.findByPk(id);
+            await temp.update({
+                name: name,
+                title: title,
+                description: description,
+                level: level
+            });
+            return await temp.save();
         }
     },
     COMMENT: {
