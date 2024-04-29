@@ -26,21 +26,21 @@ let img_color = "";
 if(level == "NORMAL") {
     style = "border-success text-white";
     img = "/images/info-circle.svg";
-    img_color = "filter: invert(35%) sepia(99%) saturate(384%) hue-rotate(100deg) brightness(96%) contrast(85%);";
+    img_color = "img-color-normal";
 } else if(level == "PRIORITY") {
     style = "border-warning text-white";
     img = "/images/question-diamond.svg";
-    img_color = "filter: invert(86%) sepia(38%) saturate(3904%) hue-rotate(352deg) brightness(101%) contrast(103%);";
+    img_color = "img-color-priority";
 } else if(level == "IMMEDIATE") {
     style = "border-danger text-white";
     img = "/images/exclamation-triangle.svg";
-    img_color = "filter: invert(32%) sepia(51%) saturate(3252%) hue-rotate(334deg) brightness(88%) contrast(95%);";
+    img_color = "img-color-immediat";
 }
 %>
 
 <div class="card mb-3 <%= style %>">
     <div class="card-header">
-        <h2 class="card-title"><img src="<%= img %>" width="32" height="32" style="<%= img_color %>"/> <%= task.dataValues.title %></h2>
+        <h2 class="card-title"><img src="<%= img %>" width="32" height="32" class="<%= img_color %>" /> <%= task.dataValues.title %></h2>
     </div>
     <div class="card-body">
         <p class="card-title">

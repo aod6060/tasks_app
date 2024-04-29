@@ -41,21 +41,28 @@
         let v = values[i]
 
         let level = v.dataValues.level;
-
         let style = "";
-
+        let img = "";
+        let img_color = "";
+        
         if(level == "NORMAL") {
             style = "border-success text-white";
+            img = "/images/info-circle.svg";
+            img_color = "img-color-normal";
         } else if(level == "PRIORITY") {
             style = "border-warning text-white";
+            img = "/images/question-diamond.svg";
+            img_color = "img-color-priority";
         } else if(level == "IMMEDIATE") {
             style = "border-danger text-white";
+            img = "/images/exclamation-triangle.svg";
+            img_color = "img-color-immediat";
         }
 %>
 
     <div class="card mb-3 <%= style %>">
         <div class="card-header">
-            <h2 class="card-title"><a href="/view/<%= v.dataValues.id %>"><%= v.dataValues.title %></a></h2>
+            <h2 class="card-title"><img src="<%= img %>" width="32" height="32" class="<%= img_color %>" /> <a href="/view/<%= v.dataValues.id %>"><%= v.dataValues.title %></a></h2>
         </div>
         <div class="card-body">
             <p class="card-title">

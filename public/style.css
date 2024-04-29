@@ -1,0 +1,11 @@
+.img-color-normal {
+    filter: invert(35%) sepia(99%) saturate(384%) hue-rotate(100deg) brightness(96%) contrast(85%);
+}
+
+.img-color-priority {
+    filter: invert(86%) sepia(38%) saturate(3904%) hue-rotate(352deg) brightness(101%) contrast(103%);
+}
+
+.img-color-immediat {
+    filter: invert(32%) sepia(51%) saturate(3252%) hue-rotate(334deg) brightness(88%) contrast(95%);
+}
