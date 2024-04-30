@@ -1,8 +1,13 @@
 <%- include("includes/header.ejs") %>
 
+<div class="mb-3">
+    <div class="mb-3">
+        <a href="/view/<%= task.dataValues.id %>" class="btn btn-primary">View</a> | <a href="/edit/<%= task.dataValues.id %>" class="btn btn-danger">Delete</a>
+    </div>
+</div>
 
 <div class="mb-3">
-    Are you sure you want to delete this task "?"
+    Are you sure you want to delete this task "<%= task.dataValues.title %>?"
 
     Warning this is a irreversable!
 </div>

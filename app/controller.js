@@ -139,7 +139,11 @@ function delete_task(req, res) {
 }
 
 function delete_task_post(req, res) {
-    res.redirect('/');
+    model.TASK.delete_task(req.params.id).
+    then((value) => {
+        res.redirect('/');
+    })
+    //res.redirect('/');
 }
 
 module.exports = {
@@ -162,6 +166,7 @@ module.exports = {
         app.get('/edit/:id', edit_task);
         app.post('/edit/:id', edit_task_post);
         // Delete Task
-
+        app.get('/delete/:id', delete_task);
+        app.post('/delete/:id', delete_task_post);
     }
 };

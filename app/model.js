@@ -1,11 +1,12 @@
 /*
     This is were all of the models will be placed in.
 */
-const { Sequelize, DataTypes } = require('sequelize')
+const { Sequelize, DataTypes, DATEONLY } = require('sequelize')
+const dayjs = require('dayjs')
 
 const sequelize = new Sequelize("sqlite:database.db");
 
-let dev = false;
+let dev = true;
 
 // Tasks has a one to one relationship with TaskLevel
 // Task has a one to many relationship with 
@@ -27,6 +28,14 @@ const Task = sequelize.define(
         is_finished: {
             type: DataTypes.BOOLEAN,
             defaultValue: false
+        },
+        start_date: {
+            type: DataTypes.DATEONLY,
+            defaultValue: DataTypes.NOW
+        },
+        end_date: {
+            type: DataTypes.DATEONLY,
+            defaultValue: DataTypes.NOW
         }
     }
 );
@@ -51,13 +60,17 @@ async function init_database() {
         await Comment.belongsTo(Task);
         await Task.sync();
         await Comment.sync();
+        
+        let current = dayjs();
 
         let temp = await Task.create(
             {
                 title: "SQL Test",
                 name: "Dan",
                 description: "This needs to be handled through out the project.",
-                level: Task.getAttributes().level.values[0]
+                level: Task.getAttributes().level.values[0],
+                start_date: current.format("YYYY-MM-DD"),
+                end_date: current.add(30, "day").format("YYYY-MM-DD")
             }
         );
         await temp.save();
@@ -77,7 +90,9 @@ async function init_database() {
                 name: "Fred",
                 description: "This needs to be handled by the end of the week.",
                 level: Task.getAttributes().level.values[1],
-                is_finished: true
+                is_finished: true,
+                start_date: current.format("YYYY-MM-DD"),
+                end_date: current.add(15, "day").format("YYYY-MM-DD")
             }
         );
 
@@ -106,7 +121,9 @@ async function init_database() {
                 title: "System Down",
                 name: "Chris",
                 description: "The system went down. We need this handle asap!",
-                level: Task.getAttributes().level.values[2]
+                level: Task.getAttributes().level.values[2],
+                start_date: current.format("YYYY-MM-DD"),
+                end_date: current.add(5, "day").format("YYYY-MM-DD")
             }
         );
         
@@ -214,7 +231,16 @@ module.exports = {
         },
         delete_task: async(id) => {
             let task = await Task.findByPk(id);
-            await this.COMMENT.delete_comments(id);
+            //await this.COMMENT.delete_comments(id);
+            let comments = await Comment.findAll({
+                where: {
+                    TaskId: id
+                }
+            });
+            for(let i = 0; i < comments.length; i++) {
+                c = comments[i];
+                await c.destroy();
+            }
             return await task.destroy();
         }
     },
@@ -237,17 +263,6 @@ module.exports = {
             console.log(temp);
 
             return await temp.save();
-        },
-        delete_comments: async (taskID) => {
-            let comments = await Comment.findAll({
-                where: {
-                    taskID: taskID
-                }
-            });
-            for(let i = 0; i < comments.length; i++) {
-                await comments[i].destroy();
-            }
-            return Promise();
         }
     }
 };
