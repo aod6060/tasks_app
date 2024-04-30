@@ -103,6 +103,7 @@ function view_task_open(req, res) {
 
 function view_task_post_comment(req, res) {
     //res.redirect(`/view/${req.params.id}`);
+    console.log("Hello, for output comment.");
     model.COMMENT.create_comment(req.body.name, req.body.message, req.params.id)
     .then((value) => {
         res.redirect(`/view/${req.params.id}`);
@@ -127,6 +128,20 @@ function edit_task_post(req, res) {
     });
 }
 
+/*
+    Delete Task
+*/
+function delete_task(req, res) {
+    model.TASK.get_task_from_pk(req.params.id)
+    .then((task) => {
+        res.render('delete_task', {task: task})
+    })
+}
+
+function delete_task_post(req, res) {
+    res.redirect('/');
+}
+
 module.exports = {
     init: (app) => {
         // Handle roughts
@@ -146,5 +161,7 @@ module.exports = {
         // Edit Task
         app.get('/edit/:id', edit_task);
         app.post('/edit/:id', edit_task_post);
+        // Delete Task
+
     }
 };

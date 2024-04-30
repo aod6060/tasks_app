@@ -120,6 +120,13 @@ async function init_database() {
             }
         );
         temp2.save();
+    } else {
+        // These have to be called in order to keep
+        // Relationships intact. Noted for future projects
+        await Task.hasMany(Comment);
+        await Comment.belongsTo(Task);
+        await Task.sync();
+        await Comment.sync();
     }
 }
 
@@ -204,6 +211,11 @@ module.exports = {
                 level: level
             });
             return await temp.save();
+        },
+        delete_task: async(id) => {
+            let task = await Task.findByPk(id);
+            await this.COMMENT.delete_comments(id);
+            return await task.destroy();
         }
     },
     COMMENT: {
@@ -215,12 +227,27 @@ module.exports = {
             });
         },
         create_comment: async (name, message, TaskId) => {
+            console.log(`name=${name}, message=${message}, TaskId=${TaskId}`)
             let temp = await Comment.create({
                 name: name,
                 message: message,
                 TaskId: TaskId
             });
+
+            console.log(temp);
+
             return await temp.save();
+        },
+        delete_comments: async (taskID) => {
+            let comments = await Comment.findAll({
+                where: {
+                    taskID: taskID
+                }
+            });
+            for(let i = 0; i < comments.length; i++) {
+                await comments[i].destroy();
+            }
+            return Promise();
         }
     }
 };
