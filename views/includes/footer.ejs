@@ -4,7 +4,29 @@
             </div>
 
         </div>
-        <script src="/js/bootstrap.bundle.min.js"></script>
+        <script src="/js/bootstrap.bundle.min.js" type="text/javascript"></script>
+        <script>
+            function run() {
+                $.ajax({
+                    url: "/enddatecheck",
+                    type: "GET",
+                    data: "",
+                    dataType: "text",
+                    success: (res, status, http) => {
+                        if(res) {
+                        }
+                    }
+                });
 
+                console.log("Hello, World");
+            }
+
+            //setTimeout(run, 600);
+
+            function setup() {
+                //setTimeout(run, 600);\
+                setInterval(run, 5000);
+            }
+        </script>
     </body>
 </html>

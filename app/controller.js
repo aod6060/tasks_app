@@ -2,6 +2,8 @@
     This is were all of the controller will be placed in
 */
 const model = require('./model')
+const dayjs = require('dayjs')
+
 model.init();
 
 /*
@@ -56,11 +58,14 @@ function create_task_post(req, res) {
         let message = "Description can't not be empty!";
         res.redirect(`/create/error/${message}`);
     } else {
+        console.log(req.body.end_date);
         model.TASK.create_task(
             req.body.name,
             req.body.title,
             req.body.description,
-            req.body.level
+            req.body.level,
+            dayjs().format("YYYY-MM-DD"),
+            req.body.end_date
         )
         .then((value)=> {
             res.redirect('/');
@@ -122,7 +127,7 @@ function edit_task(req, res) {
 }
 
 function edit_task_post(req, res) {
-    model.TASK.update_task(req.params.id, req.body.name, req.body.title, req.body.description, req.body.level)
+    model.TASK.update_task(req.params.id, req.body.name, req.body.title, req.body.description, req.body.level, req.body.end_date)
     .then((value) => {
         res.redirect(`/view/${req.params.id}`)
     });
@@ -144,6 +149,38 @@ function delete_task_post(req, res) {
         res.redirect('/');
     })
     //res.redirect('/');
+}
+
+/*
+    close_on_date_reached
+*/
+function close_on_date_reached(req, res) {
+
+    model.TASK.get_all_tasks()
+    .then(task => {
+        for(let i = 0; i < task.length; i++) {
+            let t = task[i];
+
+            let current = dayjs();
+            let endDate = dayjs(t.end_date);
+
+            /*
+            console.log(`Current Date: ${current.format("YYYY-MM-DD")}`);
+            console.log(`End Date: ${endDate.format("YYYY-MM-DD")}`);
+            */
+
+            console.log(endDate.diff(current, "day"));
+
+            if(endDate.diff(current, "day") < 1) {
+                if(!t.dataValues.is_finished) {
+                    model.TASK.update_task_finish(t.id, true).then((value) => {
+                        console.log("Closed due to being out of date!");
+                    });
+                }
+            }
+        }
+        res.send("");
+    });
 }
 
 module.exports = {
@@ -168,5 +205,7 @@ module.exports = {
         // Delete Task
         app.get('/delete/:id', delete_task);
         app.post('/delete/:id', delete_task_post);
+        // Close on end date reached
+        app.get('/enddatecheck', close_on_date_reached);
     }
 };

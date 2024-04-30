@@ -60,7 +60,7 @@ async function init_database() {
         await Comment.belongsTo(Task);
         await Task.sync();
         await Comment.sync();
-        
+
         let current = dayjs();
 
         let temp = await Task.create(
@@ -203,12 +203,14 @@ module.exports = {
         get_task_from_pk: async (id) => {
             return await Task.findByPk(id);
         },
-        create_task: async (name, title, description, level) => {
+        create_task: async (name, title, description, level, start_date, end_date) => {
             let temp = await Task.create({
                 name: name,
                 title: title,
                 description: description,
-                level: level
+                level: level,
+                start_date: start_date,
+                end_date: end_date
             });
             return await temp.save();
         },
@@ -219,13 +221,14 @@ module.exports = {
             });
             return await temp.save();
         },
-        update_task: async (id, name, title, description, level) => {
+        update_task: async (id, name, title, description, level, end_date) => {
             let temp = await Task.findByPk(id);
             await temp.update({
                 name: name,
                 title: title,
                 description: description,
-                level: level
+                level: level,
+                end_date: end_date
             });
             return await temp.save();
         },

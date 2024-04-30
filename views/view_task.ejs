@@ -10,17 +10,6 @@ let level = task.dataValues.level;
 
 let style = "";
 let img = "";
-
-/*
-<!-- 
-
-    198754 success
-    ffc107 warning
-    dc3545 danger
-    
--->
-*/
-
 let img_color = "";
 
 if(level == "NORMAL") {
@@ -36,11 +25,21 @@ if(level == "NORMAL") {
     img = "/images/exclamation-triangle.svg";
     img_color = "img-color-immediat";
 }
+
+const oneDay = 24 * 60 * 60 * 1000;
+const current = new Date();
+const end_date = new Date(task.dataValues.end_date);
+
+const diffDays = Math.round(Math.abs((end_date - current) / oneDay));
+
 %>
 
 <div class="card mb-3 <%= style %>">
     <div class="card-header">
         <h2 class="card-title"><img src="<%= img %>" width="32" height="32" class="<%= img_color %>" /> <%= task.dataValues.title %></h2>
+        <p class="card-text">
+            <%= task.dataValues.start_date %> to <%= task.dataValues.end_date %> you have <%= diffDays %> days left.
+        </p>
     </div>
     <div class="card-body">
         <p class="card-title">
