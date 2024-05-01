@@ -5,7 +5,202 @@
     <a href="/edit/<%= task.dataValues.id %>" class="btn btn-primary">Edit</a> | <a href="/delete/<%= task.dataValues.id %>" class="btn btn-danger">Delete</a>
 </div>
 <!-- This section will view the -->
+<div id="info"></div>
+<script type="text/javascript">
+    let info_url = "/view/ajax/<%= task.dataValues.id %>";
+    let comment_url = "/view/ajax/<%= task.dataValues.id %>/get/comment";
 
+    function close_task() {
+        $.get("/view/ajax/<%= task.dataValues.id %>/close", (data, status) => {
+            if(status == "success") {
+                console.log("Close Hello, World");
+                info_handler();
+                close_open_handler();
+                post_comment_handler();
+                comment_handler();
+            }
+        });
+    }
+
+    function open_task() {
+        $.get("/view/ajax/<%= task.dataValues.id %>/open", (data, status) => {
+            if(status == "success") {
+                console.log("Open Hello, World");
+                info_handler();
+                close_open_handler();
+                post_comment_handler();
+                comment_handler();
+            }
+        });
+    }
+
+    function info_handler() {
+        $.get(info_url, (data, status) => {
+            if(status == "success") {
+
+                let task = data.task;
+
+                let level = task.level;
+
+                let style = "";
+                let img = "";
+                let img_color = "";
+
+                if(level == "NORMAL") {
+                    style = "border-success text-white";
+                    img = "/images/info-circle.svg";
+                    img_color = "img-color-normal";
+                } else if(level == "PRIORITY") {
+                    style = "border-warning text-white";
+                    img = "/images/question-diamond.svg";
+                    img_color = "img-color-priority";
+                } else if(level == "IMMEDIATE") {
+                    style = "border-danger text-white";
+                    img = "/images/exclamation-triangle.svg";
+                    img_color = "img-color-immediat";
+                }
+
+                task.style = style;
+                task.img = img;
+                task.img_color = img_color;
+
+                let oneDay = 24 * 60 * 60 * 1000;
+                let current = new Date();
+                let end_date = new Date(task.end_date);
+
+                let diffDays = Math.round(Math.abs((end_date - current) / oneDay));
+
+                task.diffDays = diffDays;
+
+                let text = `
+<div class="card mb-3 {{task.style}}">
+    <div class="card-header">
+        <h2 class="card-title"><img src="{{task.img}}" width="32" height="32" class="{{task.img_color}}" /> <%= task.dataValues.title %></h2>
+        <p class="card-text">
+            {{task.start_date}} to {{task.end_date}} you have {{task.diffDays}} days left.
+        </p>
+    </div>
+    <div class="card-body">
+        <p class="card-title">
+            Create By: {{task.name}}
+        </p>
+        <p class="card-text">
+            {{task.description}}
+        </p>
+        <p>
+            STATUS: 
+            {{#task.is_finished}}
+                Closed
+            {{/task.is_finished}}
+            {{^task.is_finished}}
+                Open
+            {{/task.is_finished}}
+        </p>
+    </div>
+</div>
+                `;
+
+                let html = mustache.render(text, {task: data.task});
+
+                $("#info").html(html);
+            } else {
+                // Will redirect if file doesn't exist.
+                window.location.href = "/";
+            }
+        });
+    }
+
+    function comment_handler() {
+        $.get(comment_url, (data, status) => {
+            if(status == "success") {
+                let text = `
+{{#comments}}
+<div class="card mb-3">
+    <div class="card-header">
+        <h3 class="card-title">
+            Create By: {{name}}
+        </h3>
+    </div>
+    <div class="card-body">
+         <p class="card-text">
+            {{message}}
+        </p>
+        </div>
+</div>
+{{/comments}}
+                `;
+
+                let html = mustache.render(text, {comments: data.comments});
+
+                $("#comments").html(html);
+            }
+        });
+    }
+
+    function close_open_handler() {
+        $.get(info_url, (data, status) => {
+            if(status == "success") {
+                let text = `
+<div>
+    {{#is_finished}}
+        <form>
+            <div class="mb-3">
+                <input type="button" value="open" class="btn btn-primary" onclick="open_task()">
+            </div>
+        </form>
+    {{/is_finished}}
+    {{^is_finished}}
+        <form>
+            <div class="mb-3">
+                <input type="button" value="close" class="btn btn-primary" onclick="close_task()">
+            </div>
+        </form>
+    {{/is_finished}}
+</div>
+                `;
+
+
+                let html = mustache.render(text, {is_finished: data.task.is_finished});
+
+                $("#close_open").html(html);
+            }
+        });
+    }
+
+    function post_comment_handler() {
+        $.get(info_url, (data, status) => {
+            if(status == "success") {
+
+            }
+        });
+    }
+
+    function view_needs_refresh() {
+        $.get("/view/ajax/<%= task.id %>/needrefresh", (data, status) => {
+            if(status == "success") {
+
+                console.log(data);
+
+                if(data.is_refresh) {
+                    console.log("Hello, World");
+                    info_handler();
+                    close_open_handler();
+                    post_comment_handler();
+                    comment_handler();
+                }
+            }
+        });
+    }
+
+    $(document).ready((data) => {
+        info_handler();
+        close_open_handler();
+        post_comment_handler();
+        comment_handler();
+        setInterval(() => {view_needs_refresh();}, 1000);
+    });
+
+</script>
 <noscript>
 <%
 let level = task.dataValues.level;
@@ -68,6 +263,9 @@ const diffDays = Math.round(Math.abs((end_date - current) / oneDay));
 </div>
 </noscript>
 <!-- This little form will be used to finalize task or reinable it. -->
+
+<div id="close_open"></div>
+<noscript>
 <div>
 <% 
     if(task.dataValues.is_finished) {
@@ -89,8 +287,11 @@ const diffDays = Math.round(Math.abs((end_date - current) / oneDay));
     }
 %>
 </div>
-<!-- This form will allow for the users to post -->
+</noscript>
 
+<!-- This form will allow for the users to post -->
+<div id="post_comment"></div>
+<noscript>
 <%
     if(!task.dataValues.is_finished) {
         // This makes since because your closing the 
@@ -119,10 +320,13 @@ const diffDays = Math.round(Math.abs((end_date - current) / oneDay));
 <%
     }
 %>
+</noscript>
 <!-- This will display all the comments on the given task. -->
 <div class="mb-3">
     Comments
 </div>
+<div id="comments"></div>
+<noscript>
 <% 
     for(let i = 0; i < comments.length; i++) {
         let temp = comments[i];
@@ -143,6 +347,8 @@ const diffDays = Math.round(Math.abs((end_date - current) / oneDay));
 <%
     }
 %>
+</noscript>
+
 <div class="mb-3">
     <a href="/">Back to Index</a>
 </div>

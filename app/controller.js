@@ -6,6 +6,9 @@ const dayjs = require('dayjs')
 
 model.init();
 
+let view_need_refresh = false;
+let is_refesh_reset = false;
+
 /*
     Handling index section
 */
@@ -106,12 +109,51 @@ function view_task(req, res) {
     } else {
         model.TASK.get_task_from_pk(req.params.id)
         .then((task) => {
-            model.COMMENT.get_all_comments_from_TaskId(task.dataValues.id)
-            .then((comments) => {
-                res.render('view_task', {task: task, comments: comments});
-            });
+
+            if(task == null) {
+                res.redirect('/');
+            } else {
+                model.COMMENT.get_all_comments_from_TaskId(task.dataValues.id)
+                .then((comments) => {
+                    res.render('view_task', {task: task, comments: comments});
+                });
+            }
         });
     }
+}
+
+function view_task_ajax(req, res) {
+    model.TASK.get_task_from_pk(req.params.id)
+    .then((task) => {
+        res.json({
+            task: task
+        })
+    });
+}
+
+function view_task_ajax_comments(req, res) {
+    model.COMMENT.get_all_comments_from_TaskId(req.params.id)
+    .then((comments) => {
+        res.json({
+            comments: comments
+        })
+    });
+}
+
+function view_task_ajax_close(req, res) {
+    model.TASK.update_task_finish(req.params.id, true)
+    .then((value) => {
+        view_need_refresh = true;
+        res.send("");
+    });
+}
+
+function view_task_ajax_open(req, res) {
+    model.TASK.update_task_finish(req.params.id, false)
+    .then((value) => {
+        view_need_refresh = true;
+        res.send("");
+    });
 }
 
 function view_task_close(req, res) {
@@ -137,7 +179,20 @@ function view_task_post_comment(req, res) {
     });
 }
 
-
+function view_task_need_refresh(req, res) {
+    let b = view_need_refresh;
+    //view_need_refresh = false;
+    if(!is_refesh_reset) {
+        is_refesh_reset = true;
+        setTimeout(() => {
+            is_refesh_reset = false;
+            view_need_refresh = false;
+        }, 10000);
+    }
+    res.json({
+        is_refresh: b
+    });
+}
 /*
     Edit Task
 */
@@ -151,6 +206,7 @@ function edit_task(req, res) {
 function edit_task_post(req, res) {
     model.TASK.update_task(req.params.id, req.body.name, req.body.title, req.body.description, req.body.level, req.body.end_date)
     .then((value) => {
+        view_need_refresh = true;
         res.redirect(`/view/${req.params.id}`)
     });
 }
@@ -161,6 +217,7 @@ function edit_task_post(req, res) {
 function delete_task(req, res) {
     model.TASK.get_task_from_pk(req.params.id)
     .then((task) => {
+        view_need_refresh = true;
         res.render('delete_task', {task: task})
     })
 }
@@ -217,6 +274,13 @@ module.exports = {
         app.post('/view/:id/close', view_task_close);
         app.post('/view/:id/open', view_task_open);
         app.post('/view/:id/comment', view_task_post_comment);
+        
+        // View Task Ajax
+        app.get('/view/ajax/:id', view_task_ajax);
+        app.get('/view/ajax/:id/get/comment', view_task_ajax_comments);
+        app.get('/view/ajax/:id/close', view_task_ajax_close);
+        app.get('/view/ajax/:id/open', view_task_ajax_open);
+        app.get('/view/ajax/:id/needrefresh', view_task_need_refresh);
         // Edit Task
         app.get('/edit/:id', edit_task);
         app.post('/edit/:id', edit_task_post);
