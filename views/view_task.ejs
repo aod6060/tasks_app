@@ -34,11 +34,30 @@
         });
     }
 
+    function on_post_comment() {
+        let id = <%= task.dataValues.id %>;
+        let name = $("#name").val();
+        let message = $("#message").val();
+        $.post(`/view/ajax/${id}/post/comment`, {id: id, name: name, message: message})
+        .done((done) => {
+            info_handler();
+            close_open_handler();
+            post_comment_handler();
+            comment_handler();    
+        });
+    }
+
     function info_handler() {
         $.get(info_url, (data, status) => {
+            console.log(status);
+
             if(status == "success") {
 
                 let task = data.task;
+                if(task == null) {
+                    window.location.replace("/");
+                    return;
+                }
 
                 let level = task.level;
 
@@ -75,7 +94,7 @@
                 let text = `
 <div class="card mb-3 {{task.style}}">
     <div class="card-header">
-        <h2 class="card-title"><img src="{{task.img}}" width="32" height="32" class="{{task.img_color}}" /> <%= task.dataValues.title %></h2>
+        <h2 class="card-title"><img src="{{task.img}}" width="32" height="32" class="{{task.img_color}}" /> {{task.title}}</h2>
         <p class="card-text">
             {{task.start_date}} to {{task.end_date}} you have {{task.diffDays}} days left.
         </p>
@@ -103,9 +122,6 @@
                 let html = mustache.render(text, {task: data.task});
 
                 $("#info").html(html);
-            } else {
-                // Will redirect if file doesn't exist.
-                window.location.href = "/";
             }
         });
     }
@@ -170,7 +186,37 @@
     function post_comment_handler() {
         $.get(info_url, (data, status) => {
             if(status == "success") {
+                if(!data.task.is_finished) {
 
+                    let text = `
+<div class="mb-3">
+    <form>
+        <div class="mb-3">
+            <lable class="form-label">
+                Name
+            </lable>
+            <input type="text" name="name" id="name" class="form-control" />
+        </div>
+        <div class="mb-3">
+            <label class="form-label">
+                Message
+            </label>
+            <textarea name="message" id="message" class="form-control"></textarea>
+        </div>
+        <div class="mb-3">
+            <input type="button" value="Add Comment" class="btn btn-primary" onclick="on_post_comment()" />
+        </div>
+    </form>
+</div>
+                    `;
+
+
+                    var html = mustache.render(text, {});
+
+                    $("#post_comment").html(html);
+                } else {
+                    $("#post_comment").html("");
+                }
             }
         });
     }

@@ -156,6 +156,14 @@ function view_task_ajax_open(req, res) {
     });
 }
 
+function view_task_ajax_post_comment(req, res) {
+    model.COMMENT.create_comment(req.body.name, req.body.message, req.params.id)
+    .then((value)=>{
+        view_need_refresh = true;
+        res.send("");
+    })
+}
+
 function view_task_close(req, res) {
     model.TASK.update_task_finish(req.params.id, true)
     .then((value) => {
@@ -281,6 +289,7 @@ module.exports = {
         app.get('/view/ajax/:id/close', view_task_ajax_close);
         app.get('/view/ajax/:id/open', view_task_ajax_open);
         app.get('/view/ajax/:id/needrefresh', view_task_need_refresh);
+        app.post('/view/ajax/:id/post/comment', view_task_ajax_post_comment)
         // Edit Task
         app.get('/edit/:id', edit_task);
         app.post('/edit/:id', edit_task_post);
