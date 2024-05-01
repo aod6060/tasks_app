@@ -47,6 +47,16 @@ function index_apply_filter(req, res) {
     });
 }
 
+function index_apply_filter_ajax(req, res) {
+    model.TASK.get_all_filtered_tasks(req.params.level, req.params.finished).then((tasks) => {
+        res.json(
+            {
+                values: tasks,
+                levels: model.TASK.get_task_enum()
+            }
+        );
+    });
+}
 /*
     Creating task
 */
@@ -197,6 +207,7 @@ module.exports = {
         app.post('/index/filtered', index_filter);
         app.get('/index/filter/:level/:finished', index_apply_filter);
         app.get('/index/ajax', index_ajax);
+        app.get('/index/ajax/filter/:level/:finished', index_apply_filter_ajax);
         // Create Task
         app.get('/create', create_task);
         app.get('/create/error/:message', create_task_error);

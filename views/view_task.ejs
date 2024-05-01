@@ -5,6 +5,8 @@
     <a href="/edit/<%= task.dataValues.id %>" class="btn btn-primary">Edit</a> | <a href="/delete/<%= task.dataValues.id %>" class="btn btn-danger">Delete</a>
 </div>
 <!-- This section will view the -->
+
+<noscript>
 <%
 let level = task.dataValues.level;
 
@@ -64,6 +66,7 @@ const diffDays = Math.round(Math.abs((end_date - current) / oneDay));
         </p>
     </div>
 </div>
+</noscript>
 <!-- This little form will be used to finalize task or reinable it. -->
 <div>
 <% 

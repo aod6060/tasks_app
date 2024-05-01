@@ -1,6 +1,69 @@
 <%- include("includes/header.ejs") %>
 
 
+<div id="filter"></div>
+<script type="text/javascript">
+    let url = "/index/ajax";
+
+    function on_apply_filter() {
+        let level = $("#level").val();
+        let finished = $("#finished").val();
+
+        if(level == "ALL" && finished == "ALL") {
+            url = "/index/ajax";
+        } else {
+            url = `/index/ajax/filter/${level}/${finished}`;
+        }
+
+        views_handler();
+    }
+
+    function init_filter_form() {
+        let text = `
+        <div class="mb-3">
+            <!-- I'll add stuff later-->
+            <form>
+                <label>
+                    Level
+                </label>
+                <select id="level" name="level">
+                    <option value="ALL" selected>ALL</option>
+                    {{#levels}}
+                    <option value="{{.}}">{{.}}</option>
+                    {{/levels}}
+                </select>
+                <label>
+                    Finished
+                </label>
+                <select id="finished" name="finished">
+                    <option value="ALL" selected>ALL</option>
+                    <option value="WORKING">WORKING</option>
+                    <option value="DONE">DONE</option>
+                </select>
+                <input type="button" value="Apply" class="btn btn-primary" onclick="on_apply_filter()"/>
+            </form>
+        </div>
+        `;
+
+        let levels = [
+            <% 
+                for(let i = 0; i < levels.length; i++) {
+            %>
+            "<%= levels[i] %>",
+            <%
+                }
+            %>
+        ];
+
+        let html = mustache.render(text, {levels: levels});
+
+        $("#filter").html(html);
+    }
+
+    
+</script>
+
+<noscript>
 <div class="mb-3">
     <!-- I'll add stuff later-->
     <form action="/index/filtered" method="post">
@@ -29,6 +92,7 @@
         <input type="submit" value="Apply" class="btn btn-primary" />
     </form>
 </div>
+</noscript>
 
 <div class="mb-3">
     <a href="/create" class="btn btn-primary">New</a>
@@ -41,7 +105,7 @@
         let views = null;
 
         function views_handler() {
-            $.get("/index/ajax", (data, status) => {
+            $.get(url, (data, status) => {
                 console.log(status);
                 console.log(data);
 
@@ -115,6 +179,7 @@
         //views_handler();
         $(document).ready((data) => {
             views = document.getElementById("views");
+            init_filter_form();
             views_handler();
             //setInterval(() => {views_handler();}, 5000);
             setInterval(()=>{views_handler();}, 5000);
