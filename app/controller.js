@@ -17,6 +17,18 @@ function index(req, res) {
     });
 }
 
+function index_ajax(req, res) {
+    model.TASK.get_all_tasks()
+    .then((values) => {
+        res.json(
+            {
+                values: values,
+                levels: model.TASK.get_task_enum()
+            }
+        );
+    });
+}
+
 function index_filter(req, res) {
 
     console.log(req.params);
@@ -155,7 +167,6 @@ function delete_task_post(req, res) {
     close_on_date_reached
 */
 function close_on_date_reached(req, res) {
-
     model.TASK.get_all_tasks()
     .then(task => {
         for(let i = 0; i < task.length; i++) {
@@ -163,11 +174,6 @@ function close_on_date_reached(req, res) {
 
             let current = dayjs();
             let endDate = dayjs(t.end_date);
-
-            /*
-            console.log(`Current Date: ${current.format("YYYY-MM-DD")}`);
-            console.log(`End Date: ${endDate.format("YYYY-MM-DD")}`);
-            */
 
             console.log(endDate.diff(current, "day"));
 
@@ -190,6 +196,7 @@ module.exports = {
         app.get('/', index);
         app.post('/index/filtered', index_filter);
         app.get('/index/filter/:level/:finished', index_apply_filter);
+        app.get('/index/ajax', index_ajax);
         // Create Task
         app.get('/create', create_task);
         app.get('/create/error/:message', create_task_error);

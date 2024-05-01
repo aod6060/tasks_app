@@ -35,7 +35,92 @@
 </div>
 
 <div class="mb-3">
+    <div id="views"></div>
+    <script type="text/javascript">
 
+        let views = null;
+
+        function views_handler() {
+            $.get("/index/ajax", (data, status) => {
+                console.log(status);
+                console.log(data);
+
+                if(status == "success") {
+                    let text = `
+                        {{#values}}
+                        <div class="card mb-3 {{style}}">
+                                <div class="card-header">
+                                    
+                                    <h2 class="card-title"><img src="{{img}}" width="32" height="32" class="{{img_color}}" /><a href="/view/{{id}}">{{title}}</a></h2>
+                                    <p class="card-text">
+                                        {{start_date}} to {{end_date}} you have {{diffDays}} days left.
+                                    </p>
+                                </div>
+                                <div class="card-body">
+                                    <p class="card-title">
+                                        Create By: {{name}}
+                                    </p>
+                                    <p class="card-text">
+                                        {{description}}
+                                    </p>
+                                    <p>
+                                        STATUS: {{#is_finished}} Closed {{/is_finished}}
+                                                {{^is_finished}} Open {{/is_finished}}
+                                    </p>
+                                </div>
+                            </div> 
+                        {{/values}}
+                    `;
+
+                    let values = data.values;
+
+                    for(let i = 0; i < values.length; i++) {
+                        let level = values[i].level;
+                        let style = "";
+                        let img = "";
+                        let img_color = "";
+
+                        if(level == "NORMAL") {
+                            style = "border-success text-white";
+                            img = "/images/info-circle.svg";
+                            img_color = "img-color-normal";
+                        } else if(level == "PRIORITY") {
+                            style = "border-warning text-white";
+                            img = "/images/question-diamond.svg";
+                            img_color = "img-color-priority";
+                        } else if(level == "IMMEDIATE") {
+                            style = "border-danger text-white";
+                            img = "/images/exclamation-triangle.svg";
+                            img_color = "img-color-immediat";
+                        }
+
+                        let oneDay = 24 * 60 * 60 * 1000;
+                        let current = new Date();
+                        let end_date = new Date(values[i].end_date);
+
+                        let diffDays = Math.round(Math.abs((end_date - current) / oneDay));
+
+                        values[i].style = style;
+                        values[i].img = img;
+                        values[i].img_color = img_color;
+                        values[i].diffDays = diffDays;
+                    }
+
+                    let html = mustache.render(text, {values: values, levels: data.levels});
+                    views.innerHTML = html;
+                }
+            });
+        }
+
+        //views_handler();
+        $(document).ready((data) => {
+            views = document.getElementById("views");
+            views_handler();
+            //setInterval(() => {views_handler();}, 5000);
+            setInterval(()=>{views_handler();}, 5000);
+        });
+    </script>
+    <noscript>
 <%
     for(i = 0; i < values.length; i++) {
         let v = values[i]
@@ -103,6 +188,7 @@
     }
 %>
 
+    </noscript>
 </div>
 
 <%- include("includes/footer.ejs") %>
