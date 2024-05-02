@@ -1,10 +1,15 @@
 /*
     This is were all of the models will be placed in.
 */
-const { Sequelize, DataTypes, DATEONLY } = require('sequelize')
+const { Sequelize, DataTypes, DATEONLY, Model } = require('sequelize')
 const dayjs = require('dayjs')
+const crypto = require('crypto');
 
 const sequelize = new Sequelize("sqlite:database.db");
+
+// This should be changed if you want to use this application
+const salt = "taskit";
+let md5 = crypto.createHmac("md5", salt);
 
 let dev = true;
 
@@ -15,9 +20,6 @@ const Task = sequelize.define(
     {
         title: {
             type: DataTypes.STRING,
-        },
-        name: {
-            type: DataTypes.STRING
         },
         description: {
             type: DataTypes.TEXT
@@ -43,30 +45,75 @@ const Task = sequelize.define(
 const Comment = sequelize.define(
     'Comment',
     {
-        name: {
-            type: DataTypes.STRING
-        },
         message: {
             type: DataTypes.TEXT
         }
     }
 );
 
-async function init_database() {
-    if(dev) {
-        await Task.drop();
-        await Comment.drop();
-        await Task.hasMany(Comment);
-        await Comment.belongsTo(Task);
-        await Task.sync();
-        await Comment.sync();
+const Account = sequelize.define(
+    'Account',
+    {
+        username: {
+            type: DataTypes.STRING
+        },
+        password: {
+            type: DataTypes.STRING
+        },
+        permission: {
+            type: DataTypes.ENUM("EMPLOYEE", "MANAGER", "ADMIN")
+        }
+    }
+);
 
+async function init_database() {
+    await Task.drop();
+    await Comment.drop();
+    await Account.drop();
+    await Task.hasMany(Comment);
+    await Comment.belongsTo(Task);
+    // Account Relationships
+    // Setup Relationships for Task
+    await Account.hasMany(Task);
+    await Task.belongsTo(Account);
+    // Setup Relationships for Comments
+    await Account.hasMany(Comment);
+    await Comment.belongsTo(Account);
+
+    await Task.sync();
+    await Comment.sync();
+    await Account.sync();
+
+    if(dev) {
         let current = dayjs();
+
+        // Fred
+        let account = await Account.create({
+            username: "Fred",
+            password: md5.update("pass"),
+            permission: Account.getAttributes().permission.values[2]
+        });
+        await account.save();
+
+        // Dan
+        account = await Account.create({
+            username: "Dan",
+            password: md5.update("pass"),
+            permission: Account.getAttributes().permission.values[1]
+        });
+        await account.save();
+
+        // Chris
+        account = await Account.create({
+            username: "Chris",
+            password: md5.update("pass"),
+            permission: Account.getAttributes().permission.values[0]
+        });
+        await account.save();
 
         let temp = await Task.create(
             {
                 title: "SQL Test",
-                name: "Dan",
                 description: "This needs to be handled through out the project.",
                 level: Task.getAttributes().level.values[0],
                 start_date: current.format("YYYY-MM-DD"),
@@ -77,7 +124,6 @@ async function init_database() {
 
         let temp2 = await Comment.create(
             {
-                name: "Chris",
                 message: "Throught the project???",
                 TaskId: temp.dataValues.id
             }
@@ -87,7 +133,6 @@ async function init_database() {
         temp = await Task.create(
             {
                 title: "Web Test",
-                name: "Fred",
                 description: "This needs to be handled by the end of the week.",
                 level: Task.getAttributes().level.values[1],
                 is_finished: true,
@@ -100,7 +145,6 @@ async function init_database() {
 
         temp2 = await Comment.create(
             {
-                name: "Chris",
                 message: "Why does does this task need to be handled by the end of the week???",
                 TaskId: temp.dataValues.id
             }
@@ -109,7 +153,6 @@ async function init_database() {
 
         temp2 = await Comment.create(
             {
-                name: "Dan",
                 message: "Just because. Get it done!!!",
                 TaskId: temp.dataValues.id
             }
@@ -119,7 +162,6 @@ async function init_database() {
         temp = await Task.create(
             {
                 title: "System Down",
-                name: "Chris",
                 description: "The system went down. We need this handle asap!",
                 level: Task.getAttributes().level.values[2],
                 start_date: current.format("YYYY-MM-DD"),
@@ -131,19 +173,11 @@ async function init_database() {
 
         temp2 = await Comment.create(
             {
-                name: "Chris",
                 message: "What is going one!!!",
                 TaskId: temp.dataValues.id
             }
         );
         temp2.save();
-    } else {
-        // These have to be called in order to keep
-        // Relationships intact. Noted for future projects
-        await Task.hasMany(Comment);
-        await Comment.belongsTo(Task);
-        await Task.sync();
-        await Comment.sync();
     }
 }
 
@@ -203,9 +237,8 @@ module.exports = {
         get_task_from_pk: async (id) => {
             return await Task.findByPk(id);
         },
-        create_task: async (name, title, description, level, start_date, end_date) => {
+        create_task: async (title, description, level, start_date, end_date) => {
             let temp = await Task.create({
-                name: name,
                 title: title,
                 description: description,
                 level: level,
@@ -221,10 +254,9 @@ module.exports = {
             });
             return await temp.save();
         },
-        update_task: async (id, name, title, description, level, end_date) => {
+        update_task: async (id, title, description, level, end_date) => {
             let temp = await Task.findByPk(id);
             await temp.update({
-                name: name,
                 title: title,
                 description: description,
                 level: level,
@@ -255,10 +287,9 @@ module.exports = {
                 }
             });
         },
-        create_comment: async (name, message, TaskId) => {
-            console.log(`name=${name}, message=${message}, TaskId=${TaskId}`)
+        create_comment: async (message, TaskId) => {
+            console.log(`message=${message}, TaskId=${TaskId}`)
             let temp = await Comment.create({
-                name: name,
                 message: message,
                 TaskId: TaskId
             });
@@ -267,5 +298,16 @@ module.exports = {
 
             return await temp.save();
         }
+    },
+    ACCOUNT: {
+        get_account_permision_enum: () => {
+            return Account.getAttributes().permission.values;
+        },
+        get_all_accounts: async () => {
+            return await Account.findAll()
+        }
+    },
+    encrypte_string: (str) => {
+        return md5.update(str);
     }
 };

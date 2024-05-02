@@ -4,6 +4,7 @@
 const model = require('./model')
 const dayjs = require('dayjs')
 
+
 model.init();
 
 let view_need_refresh = false;
