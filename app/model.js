@@ -45,7 +45,8 @@ const Task = sequelize.define(
             type: DataTypes.DATEONLY,
             defaultValue: DataTypes.NOW
         }
-    }
+    },
+    {timestamps: false}
 );
 
 const Comment = sequelize.define(
@@ -54,7 +55,8 @@ const Comment = sequelize.define(
         message: {
             type: DataTypes.TEXT
         }
-    }
+    },
+    {timestamps: false}
 );
 
 const Account = sequelize.define(
@@ -69,13 +71,33 @@ const Account = sequelize.define(
         permission: {
             type: DataTypes.ENUM("EMPLOYEE", "MANAGER", "ADMIN")
         }
-    }
+    },
+    {timestamps: false}
 );
+
+const Session = sequelize.define(
+    'Session',
+    {
+        status: DataTypes.ENUM("LOGIN", "LOGOUT"),
+        log_date: DataTypes.DATE,
+    },
+    {timestamps: false}
+);
+
+const AccountSession = sequelize.define(
+    'AccountSession',
+    {},
+    {timestamps: false}
+);
+
+
 
 async function init_database() {
     await Task.drop();
     await Comment.drop();
     await Account.drop();
+    await Session.drop();
+    await AccountSession.drop();
     await Task.hasMany(Comment);
     await Comment.belongsTo(Task);
     // Account Relationships
@@ -85,7 +107,10 @@ async function init_database() {
     // Setup Relationships for Comments
     await Account.hasMany(Comment);
     await Comment.belongsTo(Account);
-
+    // Setup many to many Account and Session
+    await Account.belongsToMany(Session, {through: AccountSession});
+    await Session.belongsToMany(Account, {through: AccountSession});
+    
     await Task.sync();
     await Comment.sync();
     await Account.sync();
