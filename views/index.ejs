@@ -168,6 +168,23 @@
                         values[i].img = img;
                         values[i].img_color = img_color;
                         values[i].diffDays = diffDays;
+
+
+                        let name = "";
+
+                        for(let j = 0; j < data.accounts.length; j++) {
+                            console.log(`AccountId = ${values[i].AccountId}, id=${data.accounts[j].id}`);
+                            if(values[i].AccountId == data.accounts[j].id) {
+                                name = data.accounts[j].username;
+                                break;
+                            }
+                        }
+
+                        if(name == "") {
+                            values[i].name = "anon";
+                        } else {
+                            values[i].name = name;
+                        }
                     }
 
                     let html = mustache.render(text, {values: values, levels: data.levels});

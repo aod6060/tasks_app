@@ -16,12 +16,17 @@ let is_refesh_reset = false;
 function index(req, res) {
     //res.send("Hello, World");
     //res.render('index');
-    model.TASK.get_all_tasks().then((values) => {
-        res.render('index', {values: values, levels: model.TASK.get_task_enum()});
+    model.ACCOUNT.get_all_accounts()
+    .then((accounts) => {
+        model.TASK.get_all_tasks().then((values) => {
+            res.render('index', {values: values, levels: model.TASK.get_task_enum(), accounts: accounts});
+        });
     });
 }
 
 function index_ajax(req, res) {
+
+    /*
     model.TASK.get_all_tasks()
     .then((values) => {
         res.json(
@@ -30,6 +35,20 @@ function index_ajax(req, res) {
                 levels: model.TASK.get_task_enum()
             }
         );
+    });
+    */
+    model.ACCOUNT.get_all_accounts()
+    .then((accounts) => {
+        model.TASK.get_all_tasks().then((values) => {
+            //res.render('index', {values: values, levels: model.TASK.get_task_enum(), accounts: accounts});
+            res.json(
+                {
+                    values: values,
+                    levels: model.TASK.get_task_enum(),
+                    accounts: accounts
+                }
+            );
+        });
     });
 }
 
@@ -73,32 +92,17 @@ function create_task_error(req, res) {
 }
 
 function create_task_post(req, res) {
-    if(req.body.name == "") {
-        let message = "Name can't not be empty!";
-        res.redirect(`/create/error/${message}`);
-    }
-    else if(req.body.title == "") {
-        let message = "Title can't not be empty!";
-        res.redirect(`/create/error/${message}`);
-    } else if(req.body.description == "") {
-        let message = "Description can't not be empty!";
-        res.redirect(`/create/error/${message}`);
-    } else {
-        console.log(req.body.end_date);
-        model.TASK.create_task(
-            req.body.name,
-            req.body.title,
-            req.body.description,
-            req.body.level,
-            dayjs().format("YYYY-MM-DD"),
-            req.body.end_date
-        )
-        .then((value)=> {
-            res.redirect('/');
-        });
-        //res.redirect('/');
-    }
-    //res.redirect('/');
+    model.TASK.create_task(
+        req.body.title,
+        req.body.description,
+        req.body.level,
+        dayjs().format("YYYY-MM-DD"),
+        req.body.end_date,
+        req.body.AccountId
+    )
+    .then((value)=> {
+        res.redirect('/');
+    });
 }
 
 /*

@@ -95,9 +95,10 @@ const AccountSession = sequelize.define(
 async function init_database() {
     await Task.drop();
     await Comment.drop();
-    await Account.drop();
-    await Session.drop();
     await AccountSession.drop();
+    await Session.drop();
+    await Account.drop();
+
     await Task.hasMany(Comment);
     await Comment.belongsTo(Task);
     // Account Relationships
@@ -110,10 +111,12 @@ async function init_database() {
     // Setup many to many Account and Session
     await Account.belongsToMany(Session, {through: AccountSession});
     await Session.belongsToMany(Account, {through: AccountSession});
-    
+
     await Task.sync();
     await Comment.sync();
+    await AccountSession.sync();
     await Account.sync();
+    await Session.sync();
 
     if(dev) {
         let current = dayjs();
