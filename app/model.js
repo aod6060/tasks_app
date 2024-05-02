@@ -9,9 +9,15 @@ const sequelize = new Sequelize("sqlite:database.db");
 
 // This should be changed if you want to use this application
 const salt = "taskit";
-let md5 = crypto.createHmac("md5", salt);
+//let md5 = crypto.createHmac("md5", salt);
 
 let dev = true;
+
+
+function toMD5String(str) {
+    let m = crypto.createHmac("md5", salt);
+    return m.update(str).digest("hex");
+}
 
 // Tasks has a one to one relationship with TaskLevel
 // Task has a one to many relationship with 
@@ -87,26 +93,28 @@ async function init_database() {
     if(dev) {
         let current = dayjs();
 
-        // Fred
+        console.log(toMD5String("pass"));
+
+        // Fred 1
         let account = await Account.create({
             username: "Fred",
-            password: md5.update("pass"),
+            password: toMD5String("pass"),
             permission: Account.getAttributes().permission.values[2]
         });
         await account.save();
 
-        // Dan
+        // Dan 2
         account = await Account.create({
             username: "Dan",
-            password: md5.update("pass"),
+            password: toMD5String("pass"),
             permission: Account.getAttributes().permission.values[1]
         });
         await account.save();
 
-        // Chris
+        // Chris 3
         account = await Account.create({
             username: "Chris",
-            password: md5.update("pass"),
+            password: toMD5String("pass"),
             permission: Account.getAttributes().permission.values[0]
         });
         await account.save();
@@ -117,7 +125,8 @@ async function init_database() {
                 description: "This needs to be handled through out the project.",
                 level: Task.getAttributes().level.values[0],
                 start_date: current.format("YYYY-MM-DD"),
-                end_date: current.add(30, "day").format("YYYY-MM-DD")
+                end_date: current.add(30, "day").format("YYYY-MM-DD"),
+                AccountId: 2
             }
         );
         await temp.save();
@@ -125,7 +134,8 @@ async function init_database() {
         let temp2 = await Comment.create(
             {
                 message: "Throught the project???",
-                TaskId: temp.dataValues.id
+                TaskId: temp.dataValues.id,
+                AccountId: 3
             }
         );
         temp2.save();
@@ -137,7 +147,8 @@ async function init_database() {
                 level: Task.getAttributes().level.values[1],
                 is_finished: true,
                 start_date: current.format("YYYY-MM-DD"),
-                end_date: current.add(15, "day").format("YYYY-MM-DD")
+                end_date: current.add(15, "day").format("YYYY-MM-DD"),
+                AccountId: 1
             }
         );
 
@@ -146,7 +157,8 @@ async function init_database() {
         temp2 = await Comment.create(
             {
                 message: "Why does does this task need to be handled by the end of the week???",
-                TaskId: temp.dataValues.id
+                TaskId: temp.dataValues.id,
+                AccountId: 3
             }
         );
         temp2.save();
@@ -154,7 +166,8 @@ async function init_database() {
         temp2 = await Comment.create(
             {
                 message: "Just because. Get it done!!!",
-                TaskId: temp.dataValues.id
+                TaskId: temp.dataValues.id,
+                AccountId: 1
             }
         );
         temp2.save();
@@ -165,7 +178,8 @@ async function init_database() {
                 description: "The system went down. We need this handle asap!",
                 level: Task.getAttributes().level.values[2],
                 start_date: current.format("YYYY-MM-DD"),
-                end_date: current.add(5, "day").format("YYYY-MM-DD")
+                end_date: current.add(5, "day").format("YYYY-MM-DD"),
+                AccountId: 1
             }
         );
         
@@ -174,7 +188,8 @@ async function init_database() {
         temp2 = await Comment.create(
             {
                 message: "What is going one!!!",
-                TaskId: temp.dataValues.id
+                TaskId: temp.dataValues.id,
+                AccountId: 3
             }
         );
         temp2.save();
@@ -237,13 +252,14 @@ module.exports = {
         get_task_from_pk: async (id) => {
             return await Task.findByPk(id);
         },
-        create_task: async (title, description, level, start_date, end_date) => {
+        create_task: async (title, description, level, start_date, end_date, accountid) => {
             let temp = await Task.create({
                 title: title,
                 description: description,
                 level: level,
                 start_date: start_date,
-                end_date: end_date
+                end_date: end_date,
+                AccountId: accountid
             });
             return await temp.save();
         },
@@ -287,11 +303,12 @@ module.exports = {
                 }
             });
         },
-        create_comment: async (message, TaskId) => {
+        create_comment: async (message, TaskId, AccountId) => {
             console.log(`message=${message}, TaskId=${TaskId}`)
             let temp = await Comment.create({
                 message: message,
-                TaskId: TaskId
+                TaskId: TaskId,
+                AccountId: AccountId
             });
 
             console.log(temp);
@@ -308,6 +325,6 @@ module.exports = {
         }
     },
     encrypte_string: (str) => {
-        return md5.update(str);
+        return toMD5String(str);
     }
 };

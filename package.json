@@ -6,6 +6,7 @@
     "dayjs": "^1.11.11",
     "ejs": "^3.1.10",
     "express": "^4.19.2",
+    "express-session": "^1.18.0",
     "sequelize": "^6.37.3",
     "sqlite3": "^5.1.7"
   }
