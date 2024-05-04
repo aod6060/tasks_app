@@ -84,21 +84,15 @@ const Session = sequelize.define(
     {timestamps: false}
 );
 
-const AccountSession = sequelize.define(
-    'AccountSession',
-    {},
-    {timestamps: false}
-);
-
 
 
 async function init_database() {
-    await Task.drop();
-    await Comment.drop();
-    await AccountSession.drop();
-    await Session.drop();
-    await Account.drop();
-
+    if(dev) {
+        await Task.drop();
+        await Comment.drop();
+        await Session.drop();
+        await Account.drop();
+    }
     await Task.hasMany(Comment);
     await Comment.belongsTo(Task);
     // Account Relationships
@@ -108,13 +102,12 @@ async function init_database() {
     // Setup Relationships for Comments
     await Account.hasMany(Comment);
     await Comment.belongsTo(Account);
-    // Setup many to many Account and Session
-    await Account.belongsToMany(Session, {through: AccountSession});
-    await Session.belongsToMany(Account, {through: AccountSession});
+    // Changed my mind Accounts have man sessions
+    await Account.hasMany(Session);
+    await Session.belongsTo(Account);
 
     await Task.sync();
     await Comment.sync();
-    await AccountSession.sync();
     await Account.sync();
     await Session.sync();
 

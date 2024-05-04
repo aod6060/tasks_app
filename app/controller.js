@@ -25,18 +25,6 @@ function index(req, res) {
 }
 
 function index_ajax(req, res) {
-
-    /*
-    model.TASK.get_all_tasks()
-    .then((values) => {
-        res.json(
-            {
-                values: values,
-                levels: model.TASK.get_task_enum()
-            }
-        );
-    });
-    */
     model.ACCOUNT.get_all_accounts()
     .then((accounts) => {
         model.TASK.get_all_tasks().then((values) => {
@@ -65,12 +53,16 @@ function index_filter(req, res) {
 }
 
 function index_apply_filter(req, res) {
-    model.TASK.get_all_filtered_tasks(req.params.level, req.params.finished).then((values) => {
-        res.render('index', {values: values, levels: model.TASK.get_task_enum()});
+    model.ACCOUNT.get_all_accounts()
+    .then((accounts) => {
+        model.TASK.get_all_filtered_tasks(req.params.level, req.params.finished).then((values) => {
+            res.render('index', {values: values, levels: model.TASK.get_task_enum(), accounts});
+        });
     });
 }
 
 function index_apply_filter_ajax(req, res) {
+    /*
     model.TASK.get_all_filtered_tasks(req.params.level, req.params.finished).then((tasks) => {
         res.json(
             {
@@ -78,6 +70,20 @@ function index_apply_filter_ajax(req, res) {
                 levels: model.TASK.get_task_enum()
             }
         );
+    });*/
+    model.ACCOUNT.get_all_accounts()
+    .then((accounts) => {
+        model.TASK.get_all_filtered_tasks(req.params.level, req.params.finished).then((tasks) => {
+            //res.render('index', {values: values, levels: model.TASK.get_task_enum(), accounts});
+            
+            res.json(
+                {
+                    values: tasks,
+                    levels: model.TASK.get_task_enum(),
+                    accounts: accounts
+                }
+            );
+        });
     });
 }
 /*
@@ -112,36 +118,47 @@ function view_task(req, res) {
     if(typeof req.params.id == 'undefined') {
         res.redirect('/');
     } else {
-        model.TASK.get_task_from_pk(req.params.id)
-        .then((task) => {
+        model.ACCOUNT.get_all_accounts()
+        .then((accounts) => {
+            model.TASK.get_task_from_pk(req.params.id)
+            .then((task) => {
 
-            if(task == null) {
-                res.redirect('/');
-            } else {
-                model.COMMENT.get_all_comments_from_TaskId(task.dataValues.id)
-                .then((comments) => {
-                    res.render('view_task', {task: task, comments: comments});
-                });
-            }
-        });
+                if(task == null) {
+                    res.redirect('/');
+                } else {
+                    model.COMMENT.get_all_comments_from_TaskId(task.dataValues.id)
+                    .then((comments) => {
+                        res.render('view_task', {task: task, comments: comments, accounts: accounts});
+                    });
+                }
+            });
+        })
     }
 }
 
 function view_task_ajax(req, res) {
-    model.TASK.get_task_from_pk(req.params.id)
-    .then((task) => {
-        res.json({
-            task: task
-        })
+    model.ACCOUNT.get_all_accounts()
+    .then((accounts) => {
+        model.TASK.get_task_from_pk(req.params.id)
+        .then((task) => {
+            res.json({
+                task: task,
+                accounts: accounts
+            })
+        });
     });
 }
 
 function view_task_ajax_comments(req, res) {
-    model.COMMENT.get_all_comments_from_TaskId(req.params.id)
-    .then((comments) => {
-        res.json({
-            comments: comments
-        })
+    model.ACCOUNT.get_all_accounts()
+    .then( (accounts) => {
+        model.COMMENT.get_all_comments_from_TaskId(req.params.id)
+        .then((comments) => {
+            res.json({
+                comments: comments,
+                accounts: accounts
+            })
+        });
     });
 }
 
@@ -162,7 +179,7 @@ function view_task_ajax_open(req, res) {
 }
 
 function view_task_ajax_post_comment(req, res) {
-    model.COMMENT.create_comment(req.body.name, req.body.message, req.params.id)
+    model.COMMENT.create_comment(req.body.message, req.params.id, req.body.AccountId)
     .then((value)=>{
         view_need_refresh = true;
         res.send("");
@@ -186,7 +203,7 @@ function view_task_open(req, res) {
 function view_task_post_comment(req, res) {
     //res.redirect(`/view/${req.params.id}`);
     console.log("Hello, for output comment.");
-    model.COMMENT.create_comment(req.body.name, req.body.message, req.params.id)
+    model.COMMENT.create_comment(req.body.message, req.params.id, req.body.AccountId)
     .then((value) => {
         res.redirect(`/view/${req.params.id}`);
     });

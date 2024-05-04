@@ -233,6 +233,15 @@
 
         const diffDays = Math.round(Math.abs((end_date - current) / oneDay));
 
+        let name = "anon";
+
+        for(let j = 0; j < accounts.length; j++) {
+            if(values[i].dataValues.AccountId == accounts[j].dataValues.id) {
+                name = accounts[j].dataValues.username;
+                break;
+            }
+        }
+
 %>
 
     <div class="card mb-3 <%= style %>">
@@ -244,7 +253,7 @@
         </div>
         <div class="card-body">
             <p class="card-title">
-                Create By: <%= v.dataValues.name %>
+                Create By: <%= name %>
             </p>
             <p class="card-text">
                 <%= v.dataValues.description %>

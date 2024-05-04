@@ -91,6 +91,14 @@
 
                 task.diffDays = diffDays;
 
+                let name = "anon";
+
+                for(let i = 0; i < data.accounts.length; i++) {
+                    if(task.AccountId == data.accounts[i].id) {
+                        name = data.accounts[i].username;
+                    }
+                }
+
                 let text = `
 <div class="card mb-3 {{task.style}}">
     <div class="card-header">
@@ -101,7 +109,7 @@
     </div>
     <div class="card-body">
         <p class="card-title">
-            Create By: {{task.name}}
+            Create By: {{name}}
         </p>
         <p class="card-text">
             {{task.description}}
@@ -119,7 +127,7 @@
 </div>
                 `;
 
-                let html = mustache.render(text, {task: data.task});
+                let html = mustache.render(text, {task: data.task, name: name});
 
                 $("#info").html(html);
             }
@@ -275,6 +283,14 @@ const end_date = new Date(task.dataValues.end_date);
 
 const diffDays = Math.round(Math.abs((end_date - current) / oneDay));
 
+let name= "anon";
+
+for(let i = 0; i < accounts.length; i++) {
+    if(task.dataValues.AccountId == accounts[i].dataValues.id) {
+        name = accounts[i].dataValues.username;
+        break;
+    }
+}
 %>
 
 <div class="card mb-3 <%= style %>">
@@ -286,7 +302,7 @@ const diffDays = Math.round(Math.abs((end_date - current) / oneDay));
     </div>
     <div class="card-body">
         <p class="card-title">
-            Create By: <%= task.dataValues.name %>
+            Create By: <%= name %>
         </p>
         <p class="card-text">
             <%= task.dataValues.description %>
@@ -345,6 +361,8 @@ const diffDays = Math.round(Math.abs((end_date - current) / oneDay));
 %>
 <div class="mb-3">
     <form action="/view/<%= task.dataValues.id %>/comment" method="post">
+        <!-- Tempory hiddle variable will be removed when I'm working on the login stuff and deal with sessions. -->
+        <input type="hidden" name="AccountId" value="1" />
         <div class="mb-3">
             <lable class="form-label">
                 Name
@@ -376,12 +394,20 @@ const diffDays = Math.round(Math.abs((end_date - current) / oneDay));
 <% 
     for(let i = 0; i < comments.length; i++) {
         let temp = comments[i];
+        let name = "anon";
 
+        for(let j = 0; j < accounts.length; j++) {
+            if(temp.dataValues.AccountId == accounts[j].dataValues.id) {
+                console.log("Found ID");
+                name = accounts[j].dataValues.username;
+                break;
+            }
+        }
 %>
         <div class="card mb-3">
             <div class="card-header">
                 <h3 class="card-title">
-                    Create By: <%= temp.dataValues.name %>
+                    Create By: <%= name %>
                 </h3>
             </div>
             <div class="card-body">
